@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { PostService } from "./post.service";
+import { PostStatus } from "../../../generated/prisma/client";
 
 const createPost = async (req: Request, res: Response) => {
   try {
@@ -19,16 +20,47 @@ const createPost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const result = await PostService.getAllPosts();
+    const { search, tags, isFeatured, status, authorId } = req.query;
+
+    const searchParam = typeof search === "string" ? search : undefined;
+    const tagsParam = typeof tags === "string" ? tags.split(",") : undefined;
+    const isFeaturedParam =
+      typeof isFeatured === "string"
+        ? isFeatured === "true"
+          ? true
+          : isFeatured === "false"
+            ? false
+            : undefined
+        : undefined;
+
+    const statusParam =
+      typeof status === "string"
+        ? status === PostStatus.PUBLISHED
+          ? PostStatus.PUBLISHED
+          : status === PostStatus.DRAFT
+            ? PostStatus.DRAFT
+            : status === PostStatus.ARCHIVED
+              ? PostStatus.ARCHIVED
+              : undefined
+        : undefined;
+
+    const authorIdParam = typeof authorId === "string" ? authorId : undefined;
+
+    const result = await PostService.getAllPosts({
+      search: searchParam,
+      tags: tagsParam,
+      isFeatured: isFeaturedParam,
+      status: statusParam,
+      authorId: authorIdParam,
+    });
+
     res.status(200).json(result);
   } catch (error: any) {
-    res
-      .status(500)
-      .json({
-        error: "Failed to fetch posts",
-        message: error.message,
-        details: error.stack,
-      });
+    res.status(500).json({
+      error: "Failed to fetch posts",
+      message: error.message,
+      details: error.stack,
+    });
   }
 };
 
