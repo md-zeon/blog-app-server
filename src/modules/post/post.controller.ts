@@ -1,15 +1,25 @@
 import { Request, Response } from "express";
+import { PostService } from "./post.service";
 
-const createPost = (req: Request, res: Response) => {
-  // Logic to create a new post
-  const { title, content } = req.body;
-  res.status(201).json({
-    title,
-    content,
-    message: "Post created successfully",
-  });
+const createPost = async (req: Request, res: Response) => {
+  try {
+    const result = await PostService.createPost(req.body);
+    res.status(201).json(result);
+  } catch (error: any) {
+    res.status(400).json({ error: "Post creation Failed" });
+  }
+};
+
+const getAllPosts = async (req: Request, res: Response) => {
+  try {
+    const result = await PostService.getAllPosts();
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
 };
 
 export const PostController = {
   createPost,
+  getAllPosts,
 };
