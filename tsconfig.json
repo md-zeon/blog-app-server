@@ -43,6 +43,6 @@
     "skipLibCheck": true,
     "esModuleInterop": true, // For nodejs, also add "allowSyntheticDefaultImports": true
     "include": ["src/**/*"],
-    "exclude": ["node_modules", "dist", "src/generated"]
+    "exclude": ["node_modules", "dist", "generated"]
   }
 }
