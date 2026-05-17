@@ -7,7 +7,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  trustedOrigins: [process.env.APP_URL as string],
+  trustedOrigins: [process.env.APP_URL! || "http://localhost:4000"],
   user: {
     additionalFields: {
       role: {
