@@ -28,5 +28,15 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    autoSignIn: false,
+    requireEmailVerification: true,
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url, token }, request) => {
+      console.log("Send verification email to:", user.email);
+      console.log("Verification URL:", url);
+      console.log("Verification token:", token);
+      // Here you would integrate with your email service to send the email
+    },
   },
 });
