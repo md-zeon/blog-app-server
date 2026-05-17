@@ -9,7 +9,11 @@ const createPost = async (req: Request, res: Response) => {
     const result = await PostService.createPost(req.body, req.user.id);
     res.status(201).json(result);
   } catch (error: any) {
-    res.status(400).json({ error: "Post creation Failed" });
+    res.status(400).json({
+      error: "Post creation Failed",
+      message: error.message,
+      details: error.stack,
+    });
   }
 };
 
@@ -18,7 +22,13 @@ const getAllPosts = async (req: Request, res: Response) => {
     const result = await PostService.getAllPosts();
     res.status(200).json(result);
   } catch (error: any) {
-    res.status(500).json({ error: "Failed to fetch posts" });
+    res
+      .status(500)
+      .json({
+        error: "Failed to fetch posts",
+        message: error.message,
+        details: error.stack,
+      });
   }
 };
 
