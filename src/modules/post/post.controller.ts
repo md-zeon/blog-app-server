@@ -20,7 +20,17 @@ const createPost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const { search, tags, isFeatured, status, authorId } = req.query;
+    const {
+      search,
+      tags,
+      isFeatured,
+      status,
+      authorId,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+    } = req.query;
 
     const searchParam = typeof search === "string" ? search : undefined;
     const tagsParam = typeof tags === "string" ? tags.split(",") : undefined;
@@ -46,12 +56,26 @@ const getAllPosts = async (req: Request, res: Response) => {
 
     const authorIdParam = typeof authorId === "string" ? authorId : undefined;
 
+    const pageNum = Number(page) || 1;
+    const limitNum = Number(limit) || 10;
+
+    const sortByParam = typeof sortBy === "string" ? sortBy : "createdAt";
+    const sortOrderParam =
+      typeof sortOrder === "string" &&
+      ["asc", "desc"].includes(sortOrder.toLowerCase())
+        ? (sortOrder.toLowerCase() as "asc" | "desc")
+        : "desc";
+
     const result = await PostService.getAllPosts({
       search: searchParam,
       tags: tagsParam,
       isFeatured: isFeaturedParam,
       status: statusParam,
       authorId: authorIdParam,
+      page: pageNum,
+      limit: limitNum,
+      sortBy: sortByParam,
+      sortOrder: sortOrderParam,
     });
 
     res.status(200).json(result);

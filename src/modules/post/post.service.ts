@@ -24,9 +24,23 @@ const getAllPosts = async (payload: {
   isFeatured?: boolean | undefined;
   status?: PostStatus | undefined;
   authorId?: string | undefined;
+  page: number;
+  limit: number;
+  sortBy: string;
+  sortOrder: "asc" | "desc";
 }) => {
   try {
-    const { search, tags, isFeatured, status, authorId } = payload;
+    const {
+      search,
+      tags,
+      isFeatured,
+      status,
+      authorId,
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+    } = payload;
     const andConditions: Prisma.PostWhereInput[] = [];
 
     if (search) {
@@ -56,8 +70,13 @@ const getAllPosts = async (payload: {
     }
 
     const result = await prisma.post.findMany({
+      take: limit,
+      skip: (page - 1) * limit,
       where: {
         AND: andConditions,
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
       },
     });
 
