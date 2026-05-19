@@ -90,9 +90,30 @@ const deleteComment = async (req: Request, res: Response) => {
   }
 };
 
+const updateComment = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    const { commentId } = req.params;
+    const content = req.body;
+    const result = await CommentService.updateComment(
+      commentId as string,
+      content,
+      user?.id as string,
+    );
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({
+      error: "Failed to update comment",
+      message: error.message,
+      details: error,
+    });
+  }
+};
+
 export const CommentController = {
   createComment,
   getCommentById,
   getCommentsByAuthorId,
   deleteComment,
+  updateComment,
 };

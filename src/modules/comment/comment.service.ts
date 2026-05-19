@@ -1,3 +1,4 @@
+import { CommentStatus } from "../../../generated/prisma/enums";
 import { prisma } from "../../lib/prisma";
 
 const createComment = async (payload: {
@@ -76,9 +77,41 @@ const deleteComment = async (commentId: string) => {
   });
 };
 
+const updateComment = async (
+  commentId: string,
+  content: { content?: string; status?: CommentStatus },
+  authorId: string,
+) => {
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: commentId,
+      authorId,
+    },
+  });
+
+  if (!comment) {
+    throw new Error(`Comment not found with id ${commentId}`);
+  }
+
+  if (comment.authorId !== authorId) {
+    throw new Error("You are not the owner of this comment");
+  }
+
+  const result = await prisma.comment.update({
+    where: {
+      id: commentId,
+      authorId,
+    },
+    data: content,
+  });
+
+  return result;
+};
+
 export const CommentService = {
   createComment,
   getCommentById,
   getCommentsByAuthorId,
   deleteComment,
+  updateComment,
 };
