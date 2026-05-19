@@ -6,7 +6,11 @@ import paginationSortingHelper from "../../helpers/paginationSortingHelper";
 const createPost = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized: User not found" });
+      return res
+        .status(401)
+        .json({
+          error: "Unauthorized: You must be logged in to create a post",
+        });
     }
     const result = await PostService.createPost(req.body, req.user.id);
     res.status(201).json(result);
