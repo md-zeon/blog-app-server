@@ -68,8 +68,17 @@ const getCommentsByAuthorId = async (authorId: string) => {
   return comments;
 };
 
+const deleteComment = async (commentId: string) => {
+  await prisma.comment.delete({
+    where: {
+      id: commentId,
+    },
+  });
+};
+
 export const CommentService = {
   createComment,
   getCommentById,
   getCommentsByAuthorId,
+  deleteComment,
 };
