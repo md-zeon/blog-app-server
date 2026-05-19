@@ -26,6 +26,7 @@ const getAllPosts = async (payload: {
   authorId?: string | undefined;
   page: number;
   limit: number;
+  skip: number;
   sortBy: string;
   sortOrder: "asc" | "desc";
 }) => {
@@ -36,8 +37,8 @@ const getAllPosts = async (payload: {
       isFeatured,
       status,
       authorId,
-      page,
       limit,
+      skip,
       sortBy,
       sortOrder,
     } = payload;
@@ -71,7 +72,7 @@ const getAllPosts = async (payload: {
 
     const result = await prisma.post.findMany({
       take: limit,
-      skip: (page - 1) * limit,
+      skip: skip,
       where: {
         AND: andConditions,
       },

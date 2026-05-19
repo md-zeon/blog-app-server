@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { PostService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/client";
+import paginationSortingHelper from "../../helpers/paginationSortingHelper";
 
 const createPost = async (req: Request, res: Response) => {
   try {
@@ -20,17 +21,7 @@ const createPost = async (req: Request, res: Response) => {
 
 const getAllPosts = async (req: Request, res: Response) => {
   try {
-    const {
-      search,
-      tags,
-      isFeatured,
-      status,
-      authorId,
-      page,
-      limit,
-      sortBy,
-      sortOrder,
-    } = req.query;
+    const { search, tags, isFeatured, status, authorId } = req.query;
 
     const searchParam = typeof search === "string" ? search : undefined;
     const tagsParam = typeof tags === "string" ? tags.split(",") : undefined;
@@ -56,15 +47,9 @@ const getAllPosts = async (req: Request, res: Response) => {
 
     const authorIdParam = typeof authorId === "string" ? authorId : undefined;
 
-    const pageNum = Number(page) || 1;
-    const limitNum = Number(limit) || 10;
-
-    const sortByParam = typeof sortBy === "string" ? sortBy : "createdAt";
-    const sortOrderParam =
-      typeof sortOrder === "string" &&
-      ["asc", "desc"].includes(sortOrder.toLowerCase())
-        ? (sortOrder.toLowerCase() as "asc" | "desc")
-        : "desc";
+    const { page, limit, skip, sortBy, sortOrder } = paginationSortingHelper(
+      req.query,
+    );
 
     const result = await PostService.getAllPosts({
       search: searchParam,
@@ -72,10 +57,11 @@ const getAllPosts = async (req: Request, res: Response) => {
       isFeatured: isFeaturedParam,
       status: statusParam,
       authorId: authorIdParam,
-      page: pageNum,
-      limit: limitNum,
-      sortBy: sortByParam,
-      sortOrder: sortOrderParam,
+      page,
+      limit,
+      skip,
+      sortBy,
+      sortOrder,
     });
 
     res.status(200).json(result);
