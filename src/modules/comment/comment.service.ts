@@ -27,6 +27,26 @@ const createComment = async (payload: {
   return result;
 };
 
+const getCommentById = async (commentId: string) => {
+  const comment = await prisma.comment.findUnique({
+    where: {
+      id: commentId,
+    },
+    include: {
+      post: {
+        select: {
+          id: true,
+          title: true,
+          views: true,
+        },
+      },
+    },
+  });
+
+  return comment;
+};
+
 export const CommentService = {
   createComment,
+  getCommentById,
 };

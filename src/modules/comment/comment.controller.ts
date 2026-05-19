@@ -23,6 +23,26 @@ const createComment = async (req: Request, res: Response) => {
   }
 };
 
+const getCommentById = async (req: Request, res: Response) => {
+  try {
+    const { commentId } = req.params;
+    const comment = await CommentService.getCommentById(commentId);
+    if (!comment) {
+      return res.status(404).json({
+        error: "Comment not found",
+      });
+    }
+    res.json(comment);
+  } catch (error: any) {
+    res.status(400).json({
+      error: "Failed to get comment",
+      message: error.message,
+      details: error,
+    });
+  }
+};
+
 export const CommentController = {
   createComment,
+  getCommentById,
 };
