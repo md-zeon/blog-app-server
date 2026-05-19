@@ -1,4 +1,9 @@
-import { Post, PostStatus, Prisma } from "../../../generated/prisma/client";
+import {
+  CommentStatus,
+  Post,
+  PostStatus,
+  Prisma,
+} from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
 
 const createPost = async (
@@ -80,6 +85,11 @@ const getAllPosts = async (payload: {
       orderBy: {
         [sortBy]: sortOrder,
       },
+      include: {
+        _count: {
+          select: { comments: true },
+        },
+      },
     });
 
     const total = await prisma.post.count({
@@ -119,6 +129,30 @@ const getPostById = async (postId: string) => {
       });
       const post = await tx.post.findUnique({
         where: { id: postId },
+        include: {
+          comments: {
+            where: { parentId: null, status: CommentStatus.APPROVED },
+            orderBy: { createdAt: "desc" },
+            include: {
+              replies: {
+                where: { status: CommentStatus.APPROVED },
+                orderBy: { createdAt: "asc" },
+                include: {
+                  replies: {
+                    where: { status: CommentStatus.APPROVED },
+                    orderBy: { createdAt: "asc" },
+                    include: {
+                      replies: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          _count: {
+            select: { comments: true },
+          },
+        },
       });
       if (!post) {
         throw new Error("Post not found");
