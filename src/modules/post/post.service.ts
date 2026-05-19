@@ -37,6 +37,7 @@ const getAllPosts = async (payload: {
       isFeatured,
       status,
       authorId,
+      page,
       limit,
       skip,
       sortBy,
@@ -81,7 +82,24 @@ const getAllPosts = async (payload: {
       },
     });
 
-    return result;
+    const total = await prisma.post.count({
+      where: {
+        AND: andConditions,
+      },
+    });
+
+    return {
+      data: result,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page < Math.ceil(total / limit),
+        hasPrev: page > 1,
+        
+      },
+    };
   } catch (error) {
     throw new Error("Error fetching posts");
   }
