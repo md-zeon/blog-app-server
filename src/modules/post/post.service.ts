@@ -97,7 +97,6 @@ const getAllPosts = async (payload: {
         totalPages: Math.ceil(total / limit),
         hasNext: page < Math.ceil(total / limit),
         hasPrev: page > 1,
-        
       },
     };
   } catch (error) {
@@ -105,7 +104,36 @@ const getAllPosts = async (payload: {
   }
 };
 
+/*
+! Note: We are using a transaction here to ensure that the view count is incremented atomically with fetching the post. This prevents race conditions where multiple requests to the same post could lead to inconsistent view counts. The transaction will ensure that both operations (incrementing views and fetching the post) are treated as a single unit of work, maintaining data integrity.
+*/
+
+const getPostById = async (postId: string) => {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      await tx.post.update({
+        where: { id: postId },
+        data: {
+          views: { increment: 1 },
+        },
+      });
+      const post = await tx.post.findUnique({
+        where: { id: postId },
+      });
+      if (!post) {
+        throw new Error("Post not found");
+      }
+      return post;
+    });
+
+    return result;
+  } catch (error) {
+    throw new Error("Error fetching post");
+  }
+};
+
 export const PostService = {
   createPost,
   getAllPosts,
+  getPostById,
 };

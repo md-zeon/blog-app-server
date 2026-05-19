@@ -10,4 +10,7 @@ router.get("/", PostController.getAllPosts);
 // Create a new post
 router.post("/", auth(UserRole.USER), PostController.createPost);
 
+// get a single post
+router.get("/:postId", PostController.getPostById);
+
 export const PostRouter: Router = router;
