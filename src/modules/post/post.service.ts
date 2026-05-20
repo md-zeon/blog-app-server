@@ -4,6 +4,7 @@ import {
   PostStatus,
 } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
+import { UserRole } from "../../middlewares/auth";
 
 const createPost = async (
   data: Omit<Post, "id" | "createdAt" | "updatedAt" | "authorId">,
@@ -242,6 +243,61 @@ const deletePost = async (
   return result;
 };
 
+const getStats = async () => {
+  return await prisma.$transaction(async (tx) => {
+    const [
+      postCount,
+      publishedPosts,
+      draftPosts,
+      archivedPosts,
+      featuredPosts,
+      totalComments,
+      approvedComments,
+      rejectedComments,
+      totalViews,
+      totalUsers,
+      adminCount,
+      regularUserCount,
+    ] = await Promise.all([
+      await tx.post.count(),
+      await tx.post.count({ where: { status: PostStatus.PUBLISHED } }),
+      await tx.post.count({ where: { status: PostStatus.DRAFT } }),
+      await tx.post.count({ where: { status: PostStatus.ARCHIVED } }),
+      await tx.post.count({ where: { isFeatured: true } }),
+      await tx.comment.count(),
+      await tx.comment.count({ where: { status: CommentStatus.APPROVED } }),
+      await tx.comment.count({ where: { status: CommentStatus.REJECTED } }),
+      await tx.post.aggregate({ _sum: { views: true } }),
+      await tx.user.count(),
+      await tx.user.count({ where: { role: UserRole.ADMIN } }),
+      await tx.user.count({ where: { role: UserRole.USER } }),
+    ]);
+
+    return {
+      post: {
+        total: postCount,
+        published: publishedPosts,
+        draft: draftPosts,
+        archived: archivedPosts,
+        featured: featuredPosts,
+      },
+      comment: {
+        total: totalComments,
+        approved: approvedComments,
+        rejected: rejectedComments,
+      },
+      view: {
+        total: totalViews._sum.views || 0,
+      },
+      user: {
+        total: totalUsers,
+        admin: adminCount,
+        regular: regularUserCount,
+      },
+    };
+  });
+};
+
 export const PostService = {
   createPost,
   getAllPosts,
@@ -249,4 +305,5 @@ export const PostService = {
   getMyPosts,
   updatePost,
   deletePost,
+  getStats,
 };
