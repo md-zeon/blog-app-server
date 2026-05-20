@@ -194,9 +194,32 @@ const getMyPosts = async (authorId: string) => {
   return { data: result, meta: { total } };
 };
 
+const updatePost = async (
+  postId: string,
+  data: Partial<Post>,
+  authorId: string,
+) => {
+  const existingPost = await prisma.post.findUniqueOrThrow({
+    where: { id: postId },
+    select: { authorId: true },
+  });
+
+  if (existingPost.authorId !== authorId) {
+    throw new Error("Unauthorized: You are not the owner of this post");
+  }
+
+  const result = await prisma.post.update({
+    where: { id: postId },
+    data,
+  });
+
+  return result;
+};
+
 export const PostService = {
   createPost,
   getAllPosts,
   getPostById,
   getMyPosts,
+  updatePost,
 };

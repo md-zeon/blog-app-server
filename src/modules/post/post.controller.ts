@@ -114,9 +114,32 @@ const getMyPosts = async (req: Request, res: Response) => {
   }
 };
 
+const updatePost = async (req: Request, res: Response) => {
+  try {
+    const { postId } = req.params;
+    const user = req.user;
+    if (!user) {
+      throw new Error("Unauthorized: You must be logged in to update a post");
+    }
+    const result = await PostService.updatePost(
+      postId as string,
+      req.body,
+      user.id,
+    );
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(400).json({
+      error: "Failed to update post",
+      message: error.message,
+      details: error.stack,
+    });
+  }
+};
+
 export const PostController = {
   createPost,
   getAllPosts,
   getPostById,
   getMyPosts,
+  updatePost,
 };
