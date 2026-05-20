@@ -6,11 +6,9 @@ import paginationSortingHelper from "../../helpers/paginationSortingHelper";
 const createPost = async (req: Request, res: Response) => {
   try {
     if (!req.user) {
-      return res
-        .status(401)
-        .json({
-          error: "Unauthorized: You must be logged in to create a post",
-        });
+      return res.status(401).json({
+        error: "Unauthorized: You must be logged in to create a post",
+      });
     }
     const result = await PostService.createPost(req.body, req.user.id);
     res.status(201).json(result);
@@ -95,8 +93,30 @@ const getPostById = async (req: Request, res: Response) => {
   }
 };
 
+const getMyPosts = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+
+    if (!user) {
+      throw new Error("Unauthorized: You must be logged in to view your posts");
+    }
+    console.log("Fetching posts for user ID:", user.id);
+
+    const result = await PostService.getMyPosts(user?.id);
+
+    res.status(200).json(result);
+  } catch (error: any) {
+    res.status(500).json({
+      error: "Failed to fetch your posts",
+      message: error.message,
+      details: error,
+    });
+  }
+};
+
 export const PostController = {
   createPost,
   getAllPosts,
   getPostById,
+  getMyPosts,
 };
