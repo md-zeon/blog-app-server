@@ -198,14 +198,19 @@ const updatePost = async (
   postId: string,
   data: Partial<Post>,
   authorId: string,
+  isAdmin: boolean,
 ) => {
   const existingPost = await prisma.post.findUniqueOrThrow({
     where: { id: postId },
     select: { authorId: true },
   });
 
-  if (existingPost.authorId !== authorId) {
+  if (!isAdmin && existingPost.authorId !== authorId) {
     throw new Error("Unauthorized: You are not the owner of this post");
+  }
+
+  if (!isAdmin) {
+    delete data.isFeatured; // Regular users cannot update the isFeatured field
   }
 
   const result = await prisma.post.update({
