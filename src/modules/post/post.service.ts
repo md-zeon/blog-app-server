@@ -3,6 +3,7 @@ import {
   Post,
   PostStatus,
 } from "../../../generated/prisma/client";
+import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import { UserRole } from "../../middlewares/auth";
 
@@ -48,7 +49,7 @@ const getAllPosts = async (payload: {
       sortBy,
       sortOrder,
     } = payload;
-    const andConditions: Prisma.PostWhereInput[] = [];
+    const andConditions: PostWhereInput[] = [];
 
     if (search) {
       andConditions.push({

@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { PostService } from "./post.service";
 import { PostStatus } from "../../../generated/prisma/client";
 import paginationSortingHelper from "../../helpers/paginationSortingHelper";
 import { UserRole } from "../../middlewares/auth";
 
-const createPost = async (req: Request, res: Response) => {
+const createPost = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
       return res.status(401).json({
@@ -14,15 +14,11 @@ const createPost = async (req: Request, res: Response) => {
     const result = await PostService.createPost(req.body, req.user.id);
     res.status(201).json(result);
   } catch (error: any) {
-    res.status(400).json({
-      error: "Post creation Failed",
-      message: error.message,
-      details: error.stack,
-    });
+    next(error);
   }
 };
 
-const getAllPosts = async (req: Request, res: Response) => {
+const getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { search, tags, isFeatured, status, authorId } = req.query;
 
@@ -69,11 +65,7 @@ const getAllPosts = async (req: Request, res: Response) => {
 
     res.status(200).json(result);
   } catch (error: any) {
-    res.status(500).json({
-      error: "Failed to fetch posts",
-      message: error.message,
-      details: error.stack,
-    });
+    next(error);
   }
 };
 
